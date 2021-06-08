@@ -3,7 +3,10 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+
+
+#from app.Tokens.model import Token
+
 db = SQLAlchemy()
 app = None
 
@@ -34,6 +37,8 @@ def create_app():
     app.register_blueprint(API_bp)
     from .user.model import User
 
+    from .Tokens.model import  Token
+
     @login_manager.user_loader
     def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user
@@ -42,6 +47,9 @@ def create_app():
     with app.app_context():
         db.create_all()
         db.session.commit()
-        jwt = JWTManager(app)
+        #jwt = JWTManager(app)
         print("db created")
+        if Token.get_by_username("dani") == None:
+            Token.initTokens()
+        #Token.initTokens()
     return app

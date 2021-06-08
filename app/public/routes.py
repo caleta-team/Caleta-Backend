@@ -1,6 +1,9 @@
 from flask import abort, render_template
 from flask import request
 from . import public_bp
+from ..Tokens.model import Token
+
+
 @public_bp.route('/')
 def index():
     return render_template('index.html')
@@ -24,8 +27,10 @@ def show_post(slug):
     #    abort(404)
     #return render_template("public/post_view.html", post=post)
     if 'token' in request.headers:
-        return request.headers['token']
+        aux=Token.checkAuthorization(request.headers['token'])
+        if aux==None:
+            return {'message': 'Non Authorised - Not valid token'}, 401
+        else:
+            return {'message': 'Authorised:'+str(aux.username)}, 200
     else:
-        return {'message': 'Non Authorised'},401
-
-    #return 'Hello World2!'
+        return {'message': 'Non Authorised - Token missed'},401

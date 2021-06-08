@@ -8,7 +8,7 @@ from ..user_information.model import User_Information
 from app import db
 from ..utils.utils import *
 
-from ..Tokens.model import RevokedTokenModel
+#from ..Tokens.model import RevokedTokenModel
 '''
 from flask_jwt_extended import (
     create_access_token,
@@ -225,9 +225,9 @@ def logout():
 
     try:
         # Revoking access token
-        revoked_token = RevokedTokenModel(jti=jti)
+        #revoked_token = RevokedTokenModel(jti=jti)
 
-        revoked_token.add()
+        ##revoked_token.add()
 
         return {'message': 'Access token has been revoked'}
 
@@ -242,9 +242,9 @@ def logoutrefresh():
 
     try:
 
-        revoked_token = RevokedTokenModel(jti=jti)
+        #revoked_token = RevokedTokenModel(jti=jti)
 
-        revoked_token.add()
+        #revoked_token.add()
 
         pdb.set_trace()
 
