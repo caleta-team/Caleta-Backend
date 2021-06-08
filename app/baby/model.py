@@ -25,6 +25,15 @@ class Baby(db.Model, UserMixin):
         self.create_time = int(round(time.time() * 1000))
         # datetime.now()
 
+    def getJSON(self):
+        return {
+            'idbaby': self.idbaby,
+            'name': self.name,
+            "lastname": self.lastname,
+
+            "photo": self.photo
+
+        }
 
     def __repr__(self):
         return f'<User {self.iduser}>'
@@ -85,9 +94,12 @@ class Baby(db.Model, UserMixin):
     #    return check_password_hash(self.password, password)
 
     def save(self):
-        if not self.iduser:
+        try:
             db.session.add(self)
-            #db.session.commit()
+            db.session.commit()
+            return True
+        except:
+            return False
 
     @staticmethod
     def get_by_id(id):

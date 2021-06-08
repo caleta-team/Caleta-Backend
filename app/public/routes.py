@@ -2,13 +2,14 @@ from flask import abort, render_template
 from flask import request
 from . import public_bp
 from ..Tokens.model import Token
+from ..baby.model import Baby
 from ..user.model import User
 
 
 @public_bp.route('/username/<string:username>',methods=['GET'])
 def getUsername(username):
     aux = Token.checkAuthorization(request.headers['token'])
-    if aux == None:
+    if aux == False:
         return {'message': 'Non Authorised - Not valid token'}, 401
     else:
         user=User.get_by_username(username)
@@ -17,7 +18,7 @@ def getUsername(username):
 @public_bp.route('/username',methods=['POST'])
 def createNewUsername():
     aux = Token.checkAuthorization(request.headers['token'])
-    if aux == None:
+    if aux == False:
         return {'message': 'Non Authorised - Not valid token'}, 401
     else:
         try:
@@ -36,7 +37,37 @@ def createNewUsername():
         except:
            return {'message': 'Error creating user (data missed or already registered)'}, 401
 
+@public_bp.route('/baby/<int:babyid>',methods=['GET'])
+def getBaby(babyid):
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        baby=Baby.get_by_id(babyid)
+        return {'payload': baby.getJSON()}, 200
 
+@public_bp.route('/baby',methods=['POST'])
+def createNewBaby():
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        try:
+            data = request.get_json()
+            if data == None:
+                return {'message': 'No data available'}, 401
+            else:
+                #type = Utils.getTypeMD(), email = None, username = None, password = None, name = "", lastname = "", photo = ""
+                #user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
+                #res=user.save()
+                baby = Baby(data['name'],data['lastname'],data['photo'])
+                res = baby.save()
+                if res == True:
+                    return {"success":'Baby created!'}, 200
+                else:
+                    return {'message': 'Error creating user'}, 401
+        except:
+           return {'message': 'Error creating user (data missed or already registered)'}, 401
 '''
 @public_bp.route('/')
 def index():
