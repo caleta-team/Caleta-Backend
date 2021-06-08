@@ -14,7 +14,7 @@ class Utils:
             False
 
     @staticmethod
-    def getTypeUser():
+    def getTypeMD():
         return 0
 
     @staticmethod
@@ -22,9 +22,16 @@ class Utils:
         return 1
 
     @staticmethod
-    def getTypeRoot():
+    def getTypeRelative():
         return 2
 
     @staticmethod
-    def checkAuthToken(token):
-        return False
+    def getTypeActivity():
+        return 0
+    @staticmethod
+    def getTypeRespiration():
+        return 1
+    @staticmethod
+    def getTypePain():
+        return 2
+

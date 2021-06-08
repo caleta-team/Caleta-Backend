@@ -1,32 +1,22 @@
-from datetime import datetime
 
-import bcrypt
-from passlib.hash import pbkdf2_sha256 as sha256
 import time
 from flask_login import UserMixin
 
 from app import db
-from ..utils.utils import Utils
-
-class User(db.Model, UserMixin):
-
-    __tablename__ = 'user'
 
 
-    email = db.Column(db.String(45), unique=True, nullable=False)
-    username = db.Column(db.String(45), unique=True, nullable=False,primary_key=True)
-    password = db.Column(db.String(45), nullable=False)
-    type = db.Column(db.SMALLINT,nullable=False,default=Utils.getTypeMD())
+class Baby(db.Model, UserMixin):
+
+    __tablename__ = 'baby'
+
+    idbaby = db.Column(db.BIGINT,unique=True,primary_key=True)
     photo=db.Column(db.String(200))
     name=db.Column(db.String(45))
     lastname = db.Column(db.String(45))
     create_time = db.Column(db.BIGINT)
 
-    def __init__(self, type=Utils.getTypeMD(), email=None, username=None, password=None, name="", lastname="",photo=""):
+    def __init__(self, name="", lastname="",photo=""):
         self.type = type
-        self.email = email
-        self.username = username
-        self.password = password
         self.name = name
         self.lastname = lastname
         self.photo = photo
@@ -95,35 +85,16 @@ class User(db.Model, UserMixin):
     #    return check_password_hash(self.password, password)
 
     def save(self):
-        try:
+        if not self.iduser:
             db.session.add(self)
-            db.session.commit()
-            return True
-        except:
-            return False
+            #db.session.commit()
 
-    def getJSON(self):
-        return {
-            'username': self.username,
-            'name': self.name,
-            "lastname":self.lastname,
-            "type":self.type,
-            "photo":self.photo
-
-        }
     @staticmethod
     def get_by_id(id):
-        return User.query.get(id)
+        return Baby.query.get(id)
 
-    @staticmethod
-    def get_by_email(email):
-        return User.query.filter_by(email=email).first()
-
-    @staticmethod
-    def get_by_username(username):
-        return User.query.filter_by(username=username).first()
 
     @staticmethod
     def print(id):
-        return User.query.get(id)
+        return Baby.query.get(id)
 

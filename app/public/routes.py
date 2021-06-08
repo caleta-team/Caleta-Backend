@@ -2,8 +2,42 @@ from flask import abort, render_template
 from flask import request
 from . import public_bp
 from ..Tokens.model import Token
+from ..user.model import User
 
 
+@public_bp.route('/username/<string:username>',methods=['GET'])
+def getUsername(username):
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == None:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        user=User.get_by_username(username)
+        return {'payload': user.getJSON()}, 200
+
+@public_bp.route('/username',methods=['POST'])
+def createNewUsername():
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == None:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        try:
+            data = request.get_json()
+            if data == None:
+                return {'message': 'No data available'}, 401
+            else:
+                #type = Utils.getTypeMD(), email = None, username = None, password = None, name = "", lastname = "", photo = ""
+                user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
+                res=user.save()
+
+                if res == True:
+                    return {"success":'User created!'}, 200
+                else:
+                    return {'message': 'Error creating user'}, 401
+        except:
+           return {'message': 'Error creating user (data missed or already registered)'}, 401
+
+
+'''
 @public_bp.route('/')
 def index():
     return render_template('index.html')
@@ -34,3 +68,4 @@ def show_post(slug):
             return {'message': 'Authorised:'+str(aux.username)}, 200
     else:
         return {'message': 'Non Authorised - Token missed'},401
+'''
