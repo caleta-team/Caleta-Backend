@@ -14,9 +14,11 @@ class Event(db.Model, UserMixin):
     type = db.Column(db.SMALLINT,default=Utils.getTypeActivity())
     comments = db.Column(db.String(45))
     anomaly = db.Column(db.BOOLEAN,default=False)
+    name = db.Column(db.String(45))
     create_time = db.Column(db.BIGINT)
 
-    def __init__(self, type=Utils.getTypeActivity(),comments="",anomaly=False):
+    def __init__(self, name="",type=Utils.getTypeActivity(),comments="",anomaly=False):
+        self.name = name
         self.type = type
         self.comments = comments
         self.anomaly = anomaly
@@ -29,7 +31,8 @@ class Event(db.Model, UserMixin):
             'type': self.type,
             "comments": self.comments,
             "time":self.create_time,
-            "anomaly": self.anomaly
+            "anomaly": self.anomaly,
+            "name":self.name
 
         }
 
@@ -111,10 +114,10 @@ class Event(db.Model, UserMixin):
     @staticmethod
     def getAllEventsJSON():
         events=Event.query.all()
-        data_set = {}
+        data_set = []
         i=0
         for event in events:
             aux=event.getJSON()
-            data_set['event'+str(i)] = aux
+            data_set.append(aux)
             i=i+1
         return data_set

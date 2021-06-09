@@ -54,7 +54,9 @@ def createNewBaby():
         return {'message': 'Non Authorised - Not valid token'}, 401
     else:
         try:
+
             data = request.get_json()
+            #print(data)
             if data == None:
                 return {'message': 'No data available'}, 401
             else:
@@ -70,6 +72,17 @@ def createNewBaby():
         except:
            return {'message': 'Error creating baby (data missed or already registered)'}, 401
 
+
+@public_bp.route('/baby',methods=['GET'])
+def listBabies():
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+
+        #//event=Event.get_by_id(eventid)
+        allbabies = Baby.getAllBabyJSON()
+        return {'payload': allbabies}, 200
 
 
 @public_bp.route('/event',methods=['GET'])
@@ -107,8 +120,8 @@ def createNewEvent():
                 #type = Utils.getTypeMD(), email = None, username = None, password = None, name = "", lastname = "", photo = ""
                 #user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
                 #res=user.save()
-                print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
-                event = Event(data['type'],data['comments'],data['anomaly'])
+                #print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
+                event = Event(data['name'],data['type'],data['comments'],data['anomaly'])
                 res = event.save()
                 if res == True:
                     return {"success":'Event created!'}, 200

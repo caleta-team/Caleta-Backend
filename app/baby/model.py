@@ -110,3 +110,13 @@ class Baby(db.Model, UserMixin):
     def print(id):
         return Baby.query.get(id)
 
+    @staticmethod
+    def getAllBabyJSON():
+        babies=Baby.query.all()
+        data_set = []
+        i=0
+        for baby in babies:
+            aux=baby.getJSON()
+            data_set.append(aux)
+            i=i+1
+        return data_set
