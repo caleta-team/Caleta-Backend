@@ -16,19 +16,25 @@ class Event(db.Model, UserMixin):
     anomaly = db.Column(db.BOOLEAN,default=False)
     create_time = db.Column(db.BIGINT)
 
-    def __init__(self, name="", lastname="",photo=""):
+    def __init__(self, type=Utils.getTypeActivity(),comments="",anomaly=False):
         self.type = type
-        self.name = name
-        self.lastname = lastname
-        self.photo = photo
-       # self.password = sha256.hash(password)
-
+        self.comments = comments
+        self.anomaly = anomaly
         self.create_time = int(round(time.time() * 1000))
         # datetime.now()
 
+    def getJSON(self):
+        return {
+            'idevent': self.idevent,
+            'type': self.type,
+            "comments": self.comments,
+            "time":self.create_time,
+            "anomaly": self.anomaly
+
+        }
 
     def __repr__(self):
-        return f'<User {self.iduser}>'
+        return f'<event {self.idevent}>'
     '''
     @classmethod
     def return_all(cls):
@@ -86,16 +92,29 @@ class Event(db.Model, UserMixin):
     #    return check_password_hash(self.password, password)
 
     def save(self):
-        if not self.iduser:
+        try:
             db.session.add(self)
-            #db.session.commit()
+            db.session.commit()
+            return True
+        except:
+            return False
 
     @staticmethod
     def get_by_id(id):
-        return Baby.query.get(id)
+        return Event.query.get(id)
 
 
     @staticmethod
     def print(id):
-        return Baby.query.get(id)
+        return Event.query.get(id)
 
+    @staticmethod
+    def getAllEventsJSON():
+        events=Event.query.all()
+        data_set = {}
+        i=0
+        for event in events:
+            aux=event.getJSON()
+            data_set['event'+str(i)] = aux
+            i=i+1
+        return data_set

@@ -3,6 +3,7 @@ from flask import request
 from . import public_bp
 from ..Tokens.model import Token
 from ..baby.model import Baby
+from ..event.model import Event
 from ..user.model import User
 
 
@@ -67,7 +68,54 @@ def createNewBaby():
                 else:
                     return {'message': 'Error creating user'}, 401
         except:
-           return {'message': 'Error creating user (data missed or already registered)'}, 401
+           return {'message': 'Error creating baby (data missed or already registered)'}, 401
+
+
+
+@public_bp.route('/event',methods=['GET'])
+def listEvents():
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+
+        #//event=Event.get_by_id(eventid)
+        allevents = Event.getAllEventsJSON()
+
+        return {'payload': allevents}, 200
+
+@public_bp.route('/event/<int:eventid>',methods=['GET'])
+def getEvent(eventid):
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        event=Event.get_by_id(eventid)
+        return {'payload': event.getJSON()}, 200
+
+@public_bp.route('/event',methods=['POST'])
+def createNewEvent():
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        try:
+            data = request.get_json()
+            if data == None:
+                return {'message': 'No data available'}, 401
+            else:
+                #type = Utils.getTypeMD(), email = None, username = None, password = None, name = "", lastname = "", photo = ""
+                #user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
+                #res=user.save()
+                print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
+                event = Event(data['type'],data['comments'],data['anomaly'])
+                res = event.save()
+                if res == True:
+                    return {"success":'Event created!'}, 200
+                else:
+                    return {'message': 'Error creating event'}, 401
+        except:
+           return {'message': 'Error creating event (data missed or already registered)'}, 401
 '''
 @public_bp.route('/')
 def index():

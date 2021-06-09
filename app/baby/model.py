@@ -36,7 +36,7 @@ class Baby(db.Model, UserMixin):
         }
 
     def __repr__(self):
-        return f'<User {self.iduser}>'
+        return f'<User {self.idbaby}>'
     '''
     @classmethod
     def return_all(cls):
