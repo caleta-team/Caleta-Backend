@@ -177,7 +177,7 @@ def gen_frames():  # generate frame by frame from camera
                         b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
 
-@public_bp.route('/video_feed')
+@public_bp.route('/video_feed',methods=['GET'])
 def video_feed():
     #Video streaming route. Put this in the src attribute of an img tag
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -186,13 +186,13 @@ def video_feed():
 @public_bp.route('/oak')
 def index():
     """Video streaming home page."""
-    return render_template('index.html')
+    return render_template('indexcamera.html')
 
 
 '''
 @public_bp.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('indexcamera.html')
 
 @public_bp.route('/profile')
 def profile():
