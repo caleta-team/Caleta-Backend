@@ -1,7 +1,6 @@
 from datetime import datetime
 
-import bcrypt
-from passlib.hash import pbkdf2_sha256 as sha256
+
 import time
 from flask_login import UserMixin
 
