@@ -188,6 +188,10 @@ def index():
     """Video streaming home page."""
     return render_template('indexcamera.html')
 
+@public_bp.route('/home')
+def home():
+    """Video streaming home page."""
+    return {"success":'home!'}, 200
 
 '''
 @public_bp.route('/')
