@@ -1,11 +1,9 @@
-from flask import abort, render_template
-from flask import request
 from . import public_bp
 from ..Tokens.model import Token
 from ..baby.model import Baby
 from ..event.model import Event
 from ..user.model import User
-from flask import Flask, render_template, Response
+from flask import render_template, Response, request
 import cv2
 import depthai as dai
 
@@ -192,6 +190,14 @@ def index():
 def home():
     """Video streaming home page."""
     return {"success":'home!'}, 200
+
+
+@public_bp.route('/')
+def mainindex():
+    """Video streaming home page."""
+    return {"success":'home!'}, 200
+
+
 
 '''
 @public_bp.route('/')
