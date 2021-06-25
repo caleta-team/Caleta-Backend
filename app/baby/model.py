@@ -1,11 +1,10 @@
 
 import time
-from flask_login import UserMixin
 
 from app import db
 
 
-class Baby(db.Model, UserMixin):
+class Baby(db.Model):
 
     __tablename__ = 'baby'
 
