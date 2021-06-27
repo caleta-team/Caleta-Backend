@@ -12,3 +12,4 @@ pandas==1.2.4
 python-dateutil==2.7.3
 SQLAlchemy==1.4.17
 PyMySQL==1.0.2
+paho-mqtt==1.5.1

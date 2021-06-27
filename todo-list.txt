@@ -1,0 +1,4 @@
+-link baby ID with events (done)
+-define the attributes of each type of event
+-send to mobile app through MQTT events when receive
+-terminar la librería http y ver si está con wifi o con datos para enviar la información
