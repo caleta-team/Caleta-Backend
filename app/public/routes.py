@@ -9,6 +9,7 @@ from ..user.model import User
 from flask import render_template, Response, request
 import cv2
 import depthai as dai
+import traceback
 
 from ..utils import utils
 
@@ -115,11 +116,14 @@ def getEvent(eventid):
 @public_bp.route('/event',methods=['POST'])
 def createNewEvent():
     aux = Token.checkAuthorization(request.headers['token'])
+
     if aux == False:
         return {'message': 'Non Authorised - Not valid token'}, 401
     else:
         try:
+
             data = request.get_json()
+            #print("RES0" + data)
             if data == None:
                 return {'message': 'No data available'}, 401
             else:
@@ -127,11 +131,11 @@ def createNewEvent():
                 #user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
                 #res=user.save()
                 #print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
+                #print("RES" + str(data))
                 event = Event(data['name'],data['type'],data['comments'],data['anomaly'])
                 res = event.save()
 
                 if res == True:
-
                     if(data['type']==utils.Utils.TYPE_STRESS):
                         event_stress = EventStress(res.id,data['value'])
                         res = event_stress.save()
@@ -144,11 +148,12 @@ def createNewEvent():
                     if res==True:
                         return {"success":'Event created!'}, 200
                     else:
-                        return {'message': 'Error creating event'}, 401
+                        return {'message': 'Error creating event'}, 403
                 else:
-                    return {'message': 'Error creating event'}, 401
+                    return {'message': 'Error creating event'}, 403
         except:
-           return {'message': 'Error creating event (data missed or already registered)'}, 401
+            #traceback.print_exc()
+            return {'message': 'Error creating event (data missed or already registered)'}, 403
 
 
 def gen_frames():  # generate frame by frame from camera
