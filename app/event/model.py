@@ -11,7 +11,7 @@ class Event(db.Model, UserMixin):
     __tablename__ = 'event'
 
     idevent = db.Column(db.BIGINT,unique=True,primary_key=True)
-    type = db.Column(db.SMALLINT,default=Utils.getTypeActivity())
+    type = db.Column(db.String(10),default=Utils.getTypeActivity())
     comments = db.Column(db.String(45))
     anomaly = db.Column(db.BOOLEAN,default=False)
     name = db.Column(db.String(45))
@@ -98,7 +98,7 @@ class Event(db.Model, UserMixin):
         try:
             db.session.add(self)
             db.session.commit()
-            #db.session.flush()
+            db.session.flush()
             return True
         except:
             return False

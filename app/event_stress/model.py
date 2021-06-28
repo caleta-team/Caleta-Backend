@@ -92,7 +92,7 @@ class EventStress(db.Model):
         try:
             db.session.add(self)
             db.session.commit()
-            #db.session.flush()
+            db.session.flush()
             return True
         except:
             return False

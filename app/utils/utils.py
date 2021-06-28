@@ -31,11 +31,11 @@ class Utils:
 
     @staticmethod
     def getTypeActivity():
-        return 0
+        return Utils.TYPE_ACTIVITY
     @staticmethod
     def getTypeRespiration():
-        return 1
+        return Utils.TYPE_RESPIRATION
     @staticmethod
     def getTypePain():
-        return 2
+        return Utils.TYPE_STRESS
 

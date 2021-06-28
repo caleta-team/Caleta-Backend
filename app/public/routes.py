@@ -137,13 +137,13 @@ def createNewEvent():
 
                 if res == True:
                     if(data['type']==utils.Utils.TYPE_STRESS):
-                        event_stress = EventStress(res.id,data['value'])
+                        event_stress = EventStress(event.idevent,data['value'])
                         res = event_stress.save()
                     if (data['type'] == utils.Utils.TYPE_ACTIVITY):
-                        event_activity = EventActivity(res.id, data['value'])
+                        event_activity = EventActivity(event.idevent, data['value'])
                         res = event_activity.save()
                     if (data['type'] == utils.Utils.TYPE_RESPIRATION):
-                        event_respiration = EventRespiration(res.id, data['value'])
+                        event_respiration = EventRespiration(event.idevent, data['value'])
                         res = event_respiration.save()
                     if res==True:
                         return {"success":'Event created!'}, 200
@@ -151,8 +151,8 @@ def createNewEvent():
                         return {'message': 'Error creating event'}, 403
                 else:
                     return {'message': 'Error creating event'}, 403
-        except:
-            #traceback.print_exc()
+        except Exception:
+            traceback.print_exc()
             return {'message': 'Error creating event (data missed or already registered)'}, 403
 
 
