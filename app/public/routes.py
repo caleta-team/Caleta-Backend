@@ -2,10 +2,16 @@ from . import public_bp
 from ..Tokens.model import Token
 from ..baby.model import Baby
 from ..event.model import Event
+from ..event_activity.model import EventActivity
+from ..event_respiration.model import EventRespiration
+from ..event_stress.model import EventStress
 from ..user.model import User
 from flask import render_template, Response, request
 import cv2
 import depthai as dai
+
+from ..utils import utils
+
 
 @public_bp.route('/username/<string:username>',methods=['GET'])
 def getUsername(username):
@@ -123,8 +129,22 @@ def createNewEvent():
                 #print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
                 event = Event(data['name'],data['type'],data['comments'],data['anomaly'])
                 res = event.save()
+
                 if res == True:
-                    return {"success":'Event created!'}, 200
+
+                    if(data['type']==utils.Utils.TYPE_STRESS):
+                        event_stress = EventStress(res.id,data['value'])
+                        res = event_stress.save()
+                    if (data['type'] == utils.Utils.TYPE_ACTIVITY):
+                        event_activity = EventActivity(res.id, data['value'])
+                        res = event_activity.save()
+                    if (data['type'] == utils.Utils.TYPE_RESPIRATION):
+                        event_respiration = EventRespiration(res.id, data['value'])
+                        res = event_respiration.save()
+                    if res==True:
+                        return {"success":'Event created!'}, 200
+                    else:
+                        return {'message': 'Error creating event'}, 401
                 else:
                     return {'message': 'Error creating event'}, 401
         except:

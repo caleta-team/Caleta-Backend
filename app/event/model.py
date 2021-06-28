@@ -98,6 +98,7 @@ class Event(db.Model, UserMixin):
         try:
             db.session.add(self)
             db.session.commit()
+            db.session.flush()
             return True
         except:
             return False

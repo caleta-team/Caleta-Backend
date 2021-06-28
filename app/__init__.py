@@ -52,7 +52,7 @@ def create_app():
 
     from .event_activity.model import EventActivity
     from .event_respiration.model import EventRespiration
-    from .event_pain.model import EventPain
+    from .event_stress.model import EventStress
     #@login_manager.user_loader
     #def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user

@@ -6,11 +6,12 @@ from app import db
 from app.utils.utils import Utils
 
 
-class EventPain(db.Model):
+class EventStress(db.Model):
 
-    __tablename__ = 'event_paint'
+    __tablename__ = 'event_stress'
 
     idevent = db.Column(db.BIGINT,unique=True,primary_key=True)
+    value = db.Column(db.Integer)
     #complete with the type of data
     #type = db.Column(db.SMALLINT,default=Utils.getTypeActivity())
     #comments = db.Column(db.String(45))
@@ -18,12 +19,14 @@ class EventPain(db.Model):
     #name = db.Column(db.String(45))
     #create_time = db.Column(db.BIGINT)
 
-    def __init__(self, idevent):
+    def __init__(self, idevent,value):
         self.idevent = idevent
+        self.value = value
 
     def getJSON(self):
         return {
-            'idevent': self.idevent
+            'idevent': self.idevent,
+            'value' : self.value
 
         }
 
@@ -89,22 +92,23 @@ class EventPain(db.Model):
         try:
             db.session.add(self)
             db.session.commit()
+            db.session.flush()
             return True
         except:
             return False
 
     @staticmethod
     def get_by_id(id):
-        return EventPain.query.get(id)
+        return EventStress.query.get(id)
 
 
     @staticmethod
     def print(id):
-        return EventPain.query.get(id)
+        return EventStress.query.get(id)
 
     @staticmethod
     def getAllEventsJSON():
-        events=EventPain.query.all()
+        events=EventStress.query.all()
         data_set = []
         i=0
         for event in events:

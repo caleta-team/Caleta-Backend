@@ -5,6 +5,10 @@ import re
 regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 
 class Utils:
+    TYPE_STRESS="stress"
+    TYPE_ACTIVITY="activity"
+    TYPE_RESPIRATION="respiration"
+
     def checkEmail(email):
         # pass the regular expression
         # and the string in search() method

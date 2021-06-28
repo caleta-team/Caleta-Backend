@@ -11,6 +11,7 @@ class EventActivity(db.Model):
     __tablename__ = 'event_activity'
     MQTT_TOPIC="caleta/event/activity"
     idevent = db.Column(db.BIGINT,unique=True,primary_key=True)
+    value = db.Column(db.Integer)
     #complete with the type of data
     #type = db.Column(db.SMALLINT,default=Utils.getTypeActivity())
     #comments = db.Column(db.String(45))
@@ -18,12 +19,14 @@ class EventActivity(db.Model):
     #name = db.Column(db.String(45))
     #create_time = db.Column(db.BIGINT)
 
-    def __init__(self, idevent):
+    def __init__(self, idevent,value):
         self.idevent = idevent
+        self.value = value
 
     def getJSON(self):
         return {
-            'idevent': self.idevent
+            'idevent': self.idevent,
+            'value':self.value
 
         }
 
@@ -89,6 +92,7 @@ class EventActivity(db.Model):
         try:
             db.session.add(self)
             db.session.commit()
+            db.session.flush()
             return True
         except:
             return False
