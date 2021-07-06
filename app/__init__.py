@@ -18,7 +18,9 @@ def create_app():
     global app,mqtt
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta:Caleta123456=@localhost:3306/caleta'
+
+#cnx = mysql.connector.connect(user="caleta@caleta", password={your_password}, host="caleta.mysql.database.azure.com", port=3306, database={your_database}, ssl_ca={ca-cert filename}, ssl_verify_cert=true)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta@caleta:&T\qhruU3Q[h5Zh2@caleta.mysql.database.azure.com:3306/caleta'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -27,7 +29,7 @@ def create_app():
     #app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
     login_manager.init_app(app)
     db.init_app(app)
-    mqtt = MQTTCaleta("client1")
+
     # Registro de los Blueprints
     # blueprint for auth routes in our app
 
@@ -58,6 +60,9 @@ def create_app():
         # since the user_id is just the primary key of our user table, use it in the query for the user
     #    return User.get_by_id(int(user_id))
 
+
+    #mqtt
+    mqtt = MQTTCaleta("client1")
     with app.app_context():
         db.create_all()
         db.session.commit()
@@ -68,3 +73,15 @@ def create_app():
         #Token.initTokens()
 
     return app
+
+def on_subscribe(client, userdata, mid, granted_qos):
+    print('Subscribed for m' + str(mid))
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+
+def on_message(client, userdata, message):
+    print("Received message '" + str(message.payload) + "' on topic '" + message.topic + "' with QoS " + str(message.qos))
+
+def on_log(client, userdata, level, buf):
+    print("log: ",buf)
