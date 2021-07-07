@@ -2,8 +2,8 @@ import json
 import datetime
 import time
 
+from paho import mqtt
 
-import paho.mqtt.client as mqtt
 
 class MQTTCaleta():
     BROKER_ADDRESS="localhost"
@@ -29,7 +29,7 @@ class MQTTCaleta():
         #self.client.loop_start()
 
         print("suscrito")
-        self.test()
+        #self.test()
         self.client.loop_forever()
 
     def on_subscribe(self,client, userdata, mid, granted_qos):

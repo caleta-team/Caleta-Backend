@@ -10,7 +10,7 @@ from flask import render_template, Response, request
 import cv2
 import depthai as dai
 import traceback
-
+from azure.iot.hub import IoTHubRegistryManager
 from ..utils import utils
 from app import mqtt
 
@@ -157,7 +157,19 @@ def createNewEvent():
             return {'message': 'Error creating event (data missed or already registered)'}, 403
 
 
+#
+
+import random
+MESSAGE_COUNT = 2
+AVG_WIND_SPEED = 10.0
+MSG_TXT = "{\"service client sent a message\": %.2f}"
+CONNECTION_STRING = "HostName=iot-hub-caleta.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=fIMNVKLQ84HPV97vRznPnjBRmz/ALggXBb9qgOLW+K4="
+DEVICE_ID = "pi-caleta-1"
+registry_manager = None
+#
+
 def gen_frames():  # generate frame by frame from camera
+    global registry_manager
     while True:
         # Create pipeline
         pipeline = dai.Pipeline()
@@ -205,15 +217,29 @@ def gen_frames():  # generate frame by frame from camera
                 aux = frame.hex()
                 #print(aux)
                 #mqtt.publishMsg("caleta/streaming",aux)
-                mqtt.publishMsg("caleta/streaming",frame)
+                #mqtt.publishMsg("caleta/streaming",frame)
+                '''
+                props={}
+                # optional: assign system properties
+                props.update(messageId = "message_%d" % 1)
+                props.update(correlationId = "correlation_%d" % 1)
+                props.update(contentType = "application/json")
+
+                # optional: assign application properties
+                prop_text = "PropMsg_%d" % 1
+                props.update(testProperty = prop_text)
+
+                registry_manager.send_c2d_message(DEVICE_ID, frame, properties=props)
+                '''
+
 
 @public_bp.route('/video_feed',methods=['GET'])
 def video_feed():
-    #Video streaming route. Put this in the src attribute of an img tag
+    global registry_manager
+    registry_manager = IoTHubRegistryManager(CONNECTION_STRING)
+    #iothub_messaging_sample_run()
     gen_frames()
-    #return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-    #return Response(aux,mimetype='multipart/x-mixed-replace; boundary=frame')
     return {"success":''}, 200
 
 

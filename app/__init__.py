@@ -62,7 +62,7 @@ def create_app():
 
 
     #mqtt
-    mqtt = MQTTCaleta("client1")
+    #mqtt = MQTTCaleta("client1")
     with app.app_context():
         db.create_all()
         db.session.commit()
