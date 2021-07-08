@@ -1,3 +1,5 @@
+import subprocess
+
 from . import public_bp
 from ..Tokens.model import Token
 from ..baby.model import Baby
@@ -10,9 +12,9 @@ from flask import render_template, Response, request
 import cv2
 import depthai as dai
 import traceback
-from azure.iot.hub import IoTHubRegistryManager
 from ..utils import utils
 from app import mqtt
+
 
 
 @public_bp.route('/username/<string:username>',methods=['GET'])
@@ -157,19 +159,9 @@ def createNewEvent():
             return {'message': 'Error creating event (data missed or already registered)'}, 403
 
 
-#
-
-import random
-MESSAGE_COUNT = 2
-AVG_WIND_SPEED = 10.0
-MSG_TXT = "{\"service client sent a message\": %.2f}"
-CONNECTION_STRING = "HostName=iot-hub-caleta.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=fIMNVKLQ84HPV97vRznPnjBRmz/ALggXBb9qgOLW+K4="
-DEVICE_ID = "pi-caleta-1"
-registry_manager = None
-#
 
 def gen_frames():  # generate frame by frame from camera
-    global registry_manager
+
     while True:
         # Create pipeline
         pipeline = dai.Pipeline()
@@ -202,7 +194,23 @@ def gen_frames():  # generate frame by frame from camera
         with dai.Device(pipeline) as device:
             # Output queue will be used to get the rgb frames from the output defined above
             qRgb = device.getOutputQueue(name="video", maxSize=1, blocking=False)
-
+            fps = 30
+            width = 1280
+            height = 720
+            rtmp_url = "rtmp://localhost:1234"
+            command = ['ffmpeg',
+                       '-y',
+                       '-f', 'rawvideo',
+                       '-vcodec', 'rawvideo',
+                       '-pix_fmt', 'bgr24',
+                       '-s', "{}x{}".format(width, height),
+                       '-r', str(fps),
+                       '-i', '-',
+                       '-c:v', 'libx264',
+                       '-pix_fmt', 'yuv420p',
+                       '-preset', 'ultrafast',
+                       '-f', 'flv',
+                       rtmp_url]
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
@@ -214,10 +222,15 @@ def gen_frames():  # generate frame by frame from camera
                 #yield (b'--frame\r\n'
                 #        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
                 #aux = str(frame)
-                aux = frame.hex()
+                #aux = frame.hex()
                 #print(aux)
                 #mqtt.publishMsg("caleta/streaming",aux)
+                #if(mqtt!=None):
                 #mqtt.publishMsg("caleta/streaming",frame)
+                # command and params for ffmpeg
+
+                p = subprocess.Popen(command, stdin=subprocess.PIPE)
+                p.stdin.write(frame)
                 '''
                 props={}
                 # optional: assign system properties
@@ -235,11 +248,7 @@ def gen_frames():  # generate frame by frame from camera
 
 @public_bp.route('/video_feed',methods=['GET'])
 def video_feed():
-    global registry_manager
-    registry_manager = IoTHubRegistryManager(CONNECTION_STRING)
-    #iothub_messaging_sample_run()
     gen_frames()
-
     return {"success":''}, 200
 
 

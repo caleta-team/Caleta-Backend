@@ -10,7 +10,7 @@ from .utils.mqtt import MQTTCaleta
 
 db = SQLAlchemy()
 app = None
-mqtt=None
+mqtt = MQTTCaleta("client1")
 login_manager = LoginManager()
 UPLOAD_FOLDER = '/home/bihut/uploadFolder/'
 SECRET_KEY = "o;A3#sEt&lT_6vYmC!M8c~*IW,TQYdGCk]Yrob|g-T6fbzQLqudrXSfI}vu'6;4"
@@ -19,8 +19,9 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
 
-#cnx = mysql.connector.connect(user="caleta@caleta", password={your_password}, host="caleta.mysql.database.azure.com", port=3306, database={your_database}, ssl_ca={ca-cert filename}, ssl_verify_cert=true)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta@caleta:&T\qhruU3Q[h5Zh2@caleta.mysql.database.azure.com:3306/caleta'
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta@caleta:&T\qhruU3Q[h5Zh2@caleta.mysql.database.azure.com:3306/caleta'
+    app.config[
+        'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Upaelo1703=@localhost:3306/caleta'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -55,14 +56,9 @@ def create_app():
     from .event_activity.model import EventActivity
     from .event_respiration.model import EventRespiration
     from .event_stress.model import EventStress
-    #@login_manager.user_loader
-    #def load_user(user_id):
-        # since the user_id is just the primary key of our user table, use it in the query for the user
-    #    return User.get_by_id(int(user_id))
 
 
-    #mqtt
-    #mqtt = MQTTCaleta("client1")
+
     with app.app_context():
         db.create_all()
         db.session.commit()
@@ -73,15 +69,3 @@ def create_app():
         #Token.initTokens()
 
     return app
-
-def on_subscribe(client, userdata, mid, granted_qos):
-    print('Subscribed for m' + str(mid))
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
-
-def on_message(client, userdata, message):
-    print("Received message '" + str(message.payload) + "' on topic '" + message.topic + "' with QoS " + str(message.qos))
-
-def on_log(client, userdata, level, buf):
-    print("log: ",buf)
