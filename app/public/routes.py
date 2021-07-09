@@ -197,7 +197,8 @@ def gen_frames():  # generate frame by frame from camera
             fps = 30
             width = 1280
             height = 720
-            rtmp_url = "rtmp://localhost:1234"
+            rtmp_url = "rtmp://f20693752813476f9c882f8290818264.channel.media.azure.net:1935/live/865eede88387412ab08c092b2d9d8713/mystream"
+
             command = ['ffmpeg',
                        '-y',
                        '-f', 'rawvideo',
@@ -211,12 +212,15 @@ def gen_frames():  # generate frame by frame from camera
                        '-preset', 'ultrafast',
                        '-f', 'flv',
                        rtmp_url]
+            p = subprocess.Popen(command, stdin=subprocess.PIPE)
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
 
                 ret, buffer = cv2.imencode('.jpg', frame)
                 frame = buffer.tobytes()
+                print("ernviando")
+                p.stdin.write(frame)
                 #print(frame.hex())
 
                 #yield (b'--frame\r\n'
@@ -229,8 +233,6 @@ def gen_frames():  # generate frame by frame from camera
                 #mqtt.publishMsg("caleta/streaming",frame)
                 # command and params for ffmpeg
 
-                p = subprocess.Popen(command, stdin=subprocess.PIPE)
-                p.stdin.write(frame)
                 '''
                 props={}
                 # optional: assign system properties
