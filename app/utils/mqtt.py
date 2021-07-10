@@ -4,7 +4,7 @@ from paho.mqtt import client as mqtt_client
 
 
 class MQTTCaleta():
-    BROKER_ADDRESS="broker.hivemq.com"
+    BROKER_ADDRESS="vai.uca.es"
     BROKER_PORT=1883
     client=None
     client_id = f'python-mqtt-{random.randint(0, 1000)}'

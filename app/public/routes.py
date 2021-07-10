@@ -174,10 +174,10 @@ def gen_frames():  # generate frame by frame from camera
 
         # Properties
         camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-        camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-        camRgb.setVideoSize(1280, 720)
+        camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
+        camRgb.setVideoSize(640, 360)
         ve2 = pipeline.createVideoEncoder()
-        ve2.setDefaultProfilePreset(1280, 720, 30, dai.VideoEncoderProperties.Profile.MJPEG)
+        ve2.setDefaultProfilePreset(640, 360, 25, dai.VideoEncoderProperties.Profile.MJPEG)
         camRgb.video.link(ve2.input)
 
         #camRgb.setVideoSize(640,400)
@@ -194,6 +194,7 @@ def gen_frames():  # generate frame by frame from camera
         with dai.Device(pipeline) as device:
             # Output queue will be used to get the rgb frames from the output defined above
             qRgb = device.getOutputQueue(name="video", maxSize=1, blocking=False)
+            '''
             fps = 30
             width = 1280
             height = 720
@@ -213,14 +214,16 @@ def gen_frames():  # generate frame by frame from camera
                        '-f', 'flv',
                        rtmp_url]
             p = subprocess.Popen(command, stdin=subprocess.PIPE)
+            '''
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
 
                 ret, buffer = cv2.imencode('.jpg', frame)
                 frame = buffer.tobytes()
+                mqtt.publishMsg("caleta/streaming",frame)
                 print("ernviando")
-                p.stdin.write(frame)
+                #p.stdin.write(frame)
                 #print(frame.hex())
 
                 #yield (b'--frame\r\n'
