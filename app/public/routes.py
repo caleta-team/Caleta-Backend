@@ -175,9 +175,11 @@ def gen_frames():  # generate frame by frame from camera
         # Properties
         camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
         camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
-        camRgb.setVideoSize(640, 360)
+        camRgb.setVideoSize(640, 480)
         ve2 = pipeline.createVideoEncoder()
-        ve2.setDefaultProfilePreset(640, 360, 25, dai.VideoEncoderProperties.Profile.MJPEG)
+        camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
+
+        ve2.setDefaultProfilePreset(640, 480, 24, dai.VideoEncoderProperties.Profile.H265_MAIN)
         camRgb.video.link(ve2.input)
 
         #camRgb.setVideoSize(640,400)
@@ -220,14 +222,17 @@ def gen_frames():  # generate frame by frame from camera
                 frame = inRgb.getCvFrame() # read the camera frame
 
                 ret, buffer = cv2.imencode('.jpg', frame)
+                #print(buffer.shape)
+
                 frame = buffer.tobytes()
+                #print("tamanio en kbs",len(frame)/1024.0)
                 mqtt.publishMsg("caleta/streaming",frame)
-                print("ernviando")
+                #print("ernviando")
                 #p.stdin.write(frame)
                 #print(frame.hex())
 
-                #yield (b'--frame\r\n'
-                #        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+                yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
                 #aux = str(frame)
                 #aux = frame.hex()
                 #print(aux)
@@ -253,8 +258,9 @@ def gen_frames():  # generate frame by frame from camera
 
 @public_bp.route('/video_feed',methods=['GET'])
 def video_feed():
-    gen_frames()
-    return {"success":''}, 200
+    #gen_frames()
+    #return {"success":''}, 200
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @public_bp.route('/oak')
