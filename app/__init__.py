@@ -63,9 +63,9 @@ def create_app():
     except:
         pass
     with app.app_context():
-        db.create_all()
-        db.session.commit()
-        #jwt = JWTManager(app)
+        #db.create_all()
+        #db.session.commit()
+
         print("db created")
         if Token.get_by_username("dani") == None:
             Token.initTokens()

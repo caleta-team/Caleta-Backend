@@ -1,4 +1,6 @@
-import subprocess
+import queue
+import subprocess as sp
+import threading
 
 from . import public_bp
 from ..Tokens.model import Token
@@ -157,7 +159,40 @@ def createNewEvent():
         except Exception:
             traceback.print_exc()
             return {'message': 'Error creating event (data missed or already registered)'}, 403
+fps = 24
+width = 320
+height = 240
+frame_queue = queue.Queue()
+rtmp_url = "rtmp://150.214.91.204:1935/show/stream"
+            #rtmp_url="rtmp://localhost:1935/show/stream"
+command = ['ffmpeg',
+                       '-y',
+                       '-f', 'rawvideo',
+                       '-vcodec', 'rawvideo',
+                       '-pix_fmt', 'bgr24',
+                       '-s', "{}x{}".format(width, height),
+                       '-i', '-',
+                       '-c:v', 'libx264',
+                       '-pix_fmt', 'yuv420p',
+                       '-preset', 'ultrafast',
+                       '-f', 'flv',
+                       rtmp_url]
+p = None
+def push_frame():
+        global command, frame_queue, p
 
+        while True:
+            if len(command) > 0:
+                p = sp.Popen(command, stdin=sp.PIPE)
+                break
+
+        while True:
+            if frame_queue.empty() != True:
+                frame = frame_queue.get()
+                # process frame
+                # write to pipe
+                p.stdin.write(frame.tostring())
+                #print("escrito")
 
 
 def gen_frames():  # generate frame by frame from camera
@@ -174,12 +209,12 @@ def gen_frames():  # generate frame by frame from camera
 
         # Properties
         camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-        camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
-        camRgb.setVideoSize(640, 480)
+        #camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
+        camRgb.setVideoSize(width, height)
         ve2 = pipeline.createVideoEncoder()
         camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
 
-        ve2.setDefaultProfilePreset(640, 480, 24, dai.VideoEncoderProperties.Profile.H265_MAIN)
+        ve2.setDefaultProfilePreset(width, height, fps, dai.VideoEncoderProperties.Profile.H265_MAIN)
         camRgb.video.link(ve2.input)
 
         #camRgb.setVideoSize(640,400)
@@ -193,74 +228,55 @@ def gen_frames():  # generate frame by frame from camera
         qRgb = None
         inRgb = None
         frame = None
+
         with dai.Device(pipeline) as device:
             # Output queue will be used to get the rgb frames from the output defined above
             qRgb = device.getOutputQueue(name="video", maxSize=1, blocking=False)
-            '''
-            fps = 30
-            width = 1280
-            height = 720
-            rtmp_url = "rtmp://f20693752813476f9c882f8290818264.channel.media.azure.net:1935/live/865eede88387412ab08c092b2d9d8713/mystream"
 
-            command = ['ffmpeg',
-                       '-y',
-                       '-f', 'rawvideo',
-                       '-vcodec', 'rawvideo',
-                       '-pix_fmt', 'bgr24',
-                       '-s', "{}x{}".format(width, height),
-                       '-r', str(fps),
-                       '-i', '-',
-                       '-c:v', 'libx264',
-                       '-pix_fmt', 'yuv420p',
-                       '-preset', 'ultrafast',
-                       '-f', 'flv',
-                       rtmp_url]
-            p = subprocess.Popen(command, stdin=subprocess.PIPE)
-            '''
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
 
                 ret, buffer = cv2.imencode('.jpg', frame)
+
+                if not ret:
+                    print("Opening camera is failed")
+                    # Para ser honesto, la ruptura aquí debería ser reemplazada por:
+                    # cap = cv.VideoCapture(self.camera_path)
+                    # Porque hubo un problema con el flujo del proyecto que encontré en los últimos dos días
+                    # ¡Especialmente al extraer secuencias rtmp! ! ! !
+                    pass
+                else:
+                    #frame_queue.put(frame) # ha funcionando una vez
+                    frame_queue.put(frame)
+
+                    #print("añadido")
                 #print(buffer.shape)
 
-                frame = buffer.tobytes()
-                #print("tamanio en kbs",len(frame)/1024.0)
-                mqtt.publishMsg("caleta/streaming",frame)
-                #print("ernviando")
-                #p.stdin.write(frame)
-                #print(frame.hex())
+                #frame = buffer.tobytes()
 
-                yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-                #aux = str(frame)
-                #aux = frame.hex()
-                #print(aux)
-                #mqtt.publishMsg("caleta/streaming",aux)
-                #if(mqtt!=None):
-                #mqtt.publishMsg("caleta/streaming",frame)
-                # command and params for ffmpeg
 
-                '''
-                props={}
-                # optional: assign system properties
-                props.update(messageId = "message_%d" % 1)
-                props.update(correlationId = "correlation_%d" % 1)
-                props.update(contentType = "application/json")
+                #yield (b'--frame\r\n'
+                #        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
-                # optional: assign application properties
-                prop_text = "PropMsg_%d" % 1
-                props.update(testProperty = prop_text)
-
-                registry_manager.send_c2d_message(DEVICE_ID, frame, properties=props)
-                '''
 
 
 @public_bp.route('/video_feed',methods=['GET'])
 def video_feed():
     #gen_frames()
     #return {"success":''}, 200
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    #return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    try:
+        threads = [
+            threading.Thread(target=gen_frames, args=()),
+            threading.Thread(target=push_frame, args=())
+        ]
+        [thread.setDaemon(True) for thread in threads]
+        [thread.start() for thread in threads]
+        return {'message': 'ok'}, 200
+    except:
+        return {'message': 'error'}, 401
+
 
 
 @public_bp.route('/oak')
