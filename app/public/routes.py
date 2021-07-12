@@ -159,12 +159,11 @@ def createNewEvent():
         except Exception:
             traceback.print_exc()
             return {'message': 'Error creating event (data missed or already registered)'}, 403
-fps = 24
-width = 320
-height = 240
+fps = 30#30
+width = 1920
+height =1080
 frame_queue = queue.Queue()
 rtmp_url = "rtmp://150.214.91.204:1935/show/stream"
-            #rtmp_url="rtmp://localhost:1935/show/stream"
 command = ['ffmpeg',
                        '-y',
                        '-f', 'rawvideo',
@@ -196,7 +195,7 @@ def push_frame():
 
 
 def gen_frames():  # generate frame by frame from camera
-
+    #p = sp.Popen(command, stdin=sp.PIPE)
     while True:
         # Create pipeline
         pipeline = dai.Pipeline()
@@ -209,25 +208,26 @@ def gen_frames():  # generate frame by frame from camera
 
         # Properties
         camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
-        #camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_12_MP)
+        camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+        camRgb.setInterleaved(False)
+        camRgb.setPreviewSize(width, height)
+        camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
         camRgb.setVideoSize(width, height)
         ve2 = pipeline.createVideoEncoder()
-        camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
+
+
 
         ve2.setDefaultProfilePreset(width, height, fps, dai.VideoEncoderProperties.Profile.H265_MAIN)
         camRgb.video.link(ve2.input)
 
-        #camRgb.setVideoSize(640,400)
+        #camRgb.setVideoSize(width,height)
 
         xoutVideo.input.setBlocking(False)
         xoutVideo.input.setQueueSize(1)
 
         # Linking
         camRgb.video.link(xoutVideo.input)
-        # Connect to device and start pipeline
-        qRgb = None
-        inRgb = None
-        frame = None
+
 
         with dai.Device(pipeline) as device:
             # Output queue will be used to get the rgb frames from the output defined above
@@ -236,8 +236,11 @@ def gen_frames():  # generate frame by frame from camera
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
-
+                #cv2.imshow("bgr", frame)
                 ret, buffer = cv2.imencode('.jpg', frame)
+
+                new_w = 600
+                #frame = cv2.resize(frame, (new_w, new_h))
 
                 if not ret:
                     print("Opening camera is failed")
@@ -247,9 +250,9 @@ def gen_frames():  # generate frame by frame from camera
                     # ¡Especialmente al extraer secuencias rtmp! ! ! !
                     pass
                 else:
-                    #frame_queue.put(frame) # ha funcionando una vez
-                    frame_queue.put(frame)
-
+                    frame_queue.put(frame) # ha funcionando una vez
+                    #frame_queue.put(frame)
+                    #p.stdin.write(frame.tostring())
                     #print("añadido")
                 #print(buffer.shape)
 

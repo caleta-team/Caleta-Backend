@@ -20,8 +20,10 @@ def create_app():
     app.config['SECRET_KEY'] = SECRET_KEY
 
     #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta@caleta:&T\qhruU3Q[h5Zh2@caleta.mysql.database.azure.com:3306/caleta'
+    #app.config[
+    #    'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Upaelo1703=@localhost:3306/caleta'
     app.config[
-        'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Upaelo1703=@localhost:3306/caleta'
+            'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta:upaelo1703@localhost:3306/caleta'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -63,8 +65,8 @@ def create_app():
     except:
         pass
     with app.app_context():
-        #db.create_all()
-        #db.session.commit()
+        db.create_all()
+        db.session.commit()
 
         print("db created")
         if Token.get_by_username("dani") == None:
