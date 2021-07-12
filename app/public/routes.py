@@ -68,13 +68,9 @@ def createNewBaby():
         try:
 
             data = request.get_json()
-            #print(data)
             if data == None:
                 return {'message': 'No data available'}, 401
             else:
-                #type = Utils.getTypeMD(), email = None, username = None, password = None, name = "", lastname = "", photo = ""
-                #user = User(data['type'],data['email'],data['username'],data['password'],data['name'],data['lastname'],data['photo'])
-                #res=user.save()
                 baby = Baby(data['name'],data['lastname'],data['photo'])
                 res = baby.save()
                 if res == True:
@@ -103,7 +99,6 @@ def listEvents():
     if aux == False:
         return {'message': 'Non Authorised - Not valid token'}, 401
     else:
-
         #//event=Event.get_by_id(eventid)
         allevents = Event.getAllEventsJSON()
 
@@ -128,7 +123,6 @@ def createNewEvent():
         try:
 
             data = request.get_json()
-            #print("RES0" + data)
             if data == None:
                 return {'message': 'No data available'}, 401
             else:
