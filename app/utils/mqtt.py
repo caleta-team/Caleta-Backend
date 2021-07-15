@@ -6,6 +6,8 @@ from paho.mqtt import client as mqtt_client
 class MQTTCaleta():
     BROKER_ADDRESS="vai.uca.es"
     BROKER_PORT=1883
+    USERNAME = "caleta"
+    PASSWORD = "caleta123"
     client=None
     client_id = f'python-mqtt-{random.randint(0, 1000)}'
     def __init__(self,id=""):
@@ -14,7 +16,7 @@ class MQTTCaleta():
         #self.client.on_log = self.on_log
         self.client.on_message = self.on_message
         self.client.on_connect = self.on_connect
-
+        self.client.username_pw_set(self.USERNAME,self.PASSWORD)
         self.client.connect(self.BROKER_ADDRESS, self.BROKER_PORT)
         #self.client.connect(self.BROKER_ADDRESS,self.BROKER_PORT)  # connect to broker
         #self.client.loop_start()
