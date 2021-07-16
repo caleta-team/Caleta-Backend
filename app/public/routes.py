@@ -1,6 +1,7 @@
 import queue
 import subprocess as sp
 import threading
+from time import sleep
 
 from . import public_bp
 from ..Tokens.model import Token
@@ -157,7 +158,7 @@ fps = 30#30
 width = 1920
 height =1080
 frame_queue = queue.Queue()
-rtmp_url = "rtmp://150.214.91.204:1935/show/stream"
+rtmp_url = "rtsp://localhost:8554/mystream" #"rtmp://localhost:1935/show/stream"
 command = ['ffmpeg',
                        '-y',
                        '-f', 'rawvideo',
@@ -168,7 +169,7 @@ command = ['ffmpeg',
                        '-c:v', 'libx264',
                        '-pix_fmt', 'yuv420p',
                        '-preset', 'ultrafast',
-                       '-f', 'flv',
+                       '-f', 'rtsp',
                        rtmp_url]
 p = None
 def push_frame():
@@ -211,7 +212,7 @@ def gen_frames():  # generate frame by frame from camera
 
 
 
-        ve2.setDefaultProfilePreset(width, height, fps, dai.VideoEncoderProperties.Profile.H265_MAIN)
+        ve2.setDefaultProfilePreset(width, height, fps, dai.VideoEncoderProperties.Profile.MJPEG)
         camRgb.video.link(ve2.input)
 
         #camRgb.setVideoSize(width,height)
@@ -245,10 +246,9 @@ def gen_frames():  # generate frame by frame from camera
                     pass
                 else:
                     frame_queue.put(frame) # ha funcionando una vez
-                    #frame_queue.put(frame)
-                    #p.stdin.write(frame.tostring())
-                    #print("añadido")
-                #print(buffer.shape)
+                    #print("enviando mqtt")
+
+                    #mqtt.publishMsg("caleta/stream",buffer.tostring())
 
                 #frame = buffer.tobytes()
 

@@ -10,12 +10,12 @@ from .utils.mqtt import MQTTCaleta
 
 db = SQLAlchemy()
 app = None
-mqtt = None
+mqtt = MQTTCaleta("client1")
 login_manager = LoginManager()
 UPLOAD_FOLDER = '/home/bihut/uploadFolder/'
 SECRET_KEY = "o;A3#sEt&lT_6vYmC!M8c~*IW,TQYdGCk]Yrob|g-T6fbzQLqudrXSfI}vu'6;4"
 def create_app():
-    global app,mqtt
+    global app, mqtt
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -59,15 +59,12 @@ def create_app():
     from .event_respiration.model import EventRespiration
     from .event_stress.model import EventStress
 
-    try:
-        MQTTCaleta("client1")
-        pass
-    except:
-        pass
+
+
+
     with app.app_context():
         db.create_all()
         db.session.commit()
-
         print("db created")
         if Token.get_by_username("dani") == None:
             Token.initTokens()
