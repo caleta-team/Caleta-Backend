@@ -102,8 +102,26 @@ def listEvents():
     else:
         #//event=Event.get_by_id(eventid)
         allevents = Event.getAllEventsJSON()
-
         return {'payload': allevents}, 200
+
+
+@public_bp.route('/events/<string:type>/<int:starttime>/<int:endtime>',methods=['GET'])
+def listEventsQuery(type,starttime,endtime):
+    aux = Token.checkAuthorization(request.headers['token'])
+    if aux == False:
+        return {'message': 'Non Authorised - Not valid token'}, 401
+    else:
+        if type=="all":
+            events = Event.query.filter(Event.create_time >= starttime, Event.create_time <= endtime)
+        else:
+            events = Event.query.filter(Event.create_time >= starttime, Event.create_time <= endtime,Event.type == type)
+
+        array_result = []
+        for event in events.all():
+            array_result.append(event.getJSON())
+
+        print(array_result)
+        return {'payload': array_result}, 200
 
 @public_bp.route('/event/<int:eventid>',methods=['GET'])
 def getEvent(eventid):
@@ -132,9 +150,12 @@ def createNewEvent():
                 #res=user.save()
                 #print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
                 #print("RES" + str(data))
-                event = Event(data['name'],data['type'],data['comments'],data['anomaly'])
+                event = Event(data['name'],data['type'],data['comments'],data['anomaly'],data['value'])
                 res = event.save()
 
+                if res == True:
+                    return {"success": 'Event created!'}, 200
+                '''
                 if res == True:
                     if(data['type']==utils.Utils.TYPE_STRESS):
                         event_stress = EventStress(event.idevent,data['value'])
@@ -151,6 +172,7 @@ def createNewEvent():
                         return {'message': 'Error creating event'}, 403
                 else:
                     return {'message': 'Error creating event'}, 403
+                '''
         except Exception:
             traceback.print_exc()
             return {'message': 'Error creating event (data missed or already registered)'}, 403

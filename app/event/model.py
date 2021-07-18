@@ -15,24 +15,27 @@ class Event(db.Model, UserMixin):
     comments = db.Column(db.String(45))
     anomaly = db.Column(db.BOOLEAN,default=False)
     name = db.Column(db.String(45))
+    value = db.Column(db.Integer())
     create_time = db.Column(db.BIGINT)
 
-    def __init__(self, name="",type=Utils.getTypeActivity(),comments="",anomaly=False):
+    def __init__(self, name="",type=Utils.getTypeActivity(),comments="",anomaly=False,value=-1):
         self.name = name
         self.type = type
         self.comments = comments
         self.anomaly = anomaly
         self.create_time = int(round(time.time() * 1000))
+        self.value = value
         # datetime.now()
 
     def getJSON(self):
         return {
-            'idevent': self.idevent,
-            'type': self.type,
+            "idevent": self.idevent,
+            "type": self.type,
             "comments": self.comments,
             "time":self.create_time,
             "anomaly": self.anomaly,
-            "name":self.name
+            "name":self.name,
+            "value":self.value
 
         }
 

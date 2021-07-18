@@ -29,7 +29,6 @@ class Baby(db.Model):
             'idbaby': self.idbaby,
             'name': self.name,
             "lastname": self.lastname,
-
             "photo": self.photo
 
         }

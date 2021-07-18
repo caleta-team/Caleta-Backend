@@ -10,7 +10,7 @@ from .utils.mqtt import MQTTCaleta
 
 db = SQLAlchemy()
 app = None
-mqtt = MQTTCaleta("client1")
+mqtt = MQTTCaleta()
 login_manager = LoginManager()
 UPLOAD_FOLDER = '/home/bihut/uploadFolder/'
 SECRET_KEY = "o;A3#sEt&lT_6vYmC!M8c~*IW,TQYdGCk]Yrob|g-T6fbzQLqudrXSfI}vu'6;4"
@@ -23,7 +23,7 @@ def create_app():
     #app.config[
     #    'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Upaelo1703=@localhost:3306/caleta'
     app.config[
-            'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta:Caleta123=@localhost:3306/caleta'
+            'SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://caleta:Caleta123=@vai.uca.es:3306/caleta'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -61,11 +61,10 @@ def create_app():
 
 
 
-
     with app.app_context():
         db.create_all()
         db.session.commit()
-        print("db created")
+        print("DB created/connected")
         if Token.get_by_username("dani") == None:
             Token.initTokens()
 

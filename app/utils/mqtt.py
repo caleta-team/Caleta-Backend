@@ -1,5 +1,5 @@
 import random
-
+import uuid
 from paho.mqtt import client as mqtt_client
 
 
@@ -10,7 +10,7 @@ class MQTTCaleta():
     PASSWORD = "caleta123"
     client=None
     client_id = f'python-mqtt-{random.randint(0, 1000)}'
-    def __init__(self,id=""):
+    def __init__(self,id=str(uuid.uuid4())):
         super().__init__()
         self.client = mqtt_client.Client(self.client_id)
         #self.client.on_log = self.on_log
@@ -32,7 +32,10 @@ class MQTTCaleta():
         print("log: ", buf)
 
     def on_connect(self,client, userdata, flags, rc):
-        print("Connected with result code " + str(rc))
+        if rc==0:
+            print("Connected to the MQTT Broker")
+        else:
+            print("Error Connecting MQTT Broker - Code Error " + str(rc))
 
     def unsubscribe(self,topic):
         self.client.unsubscribe(topic)
