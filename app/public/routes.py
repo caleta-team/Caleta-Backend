@@ -1,3 +1,4 @@
+import json
 import queue
 import subprocess as sp
 import threading
@@ -150,10 +151,15 @@ def createNewEvent():
                 #res=user.save()
                 #print(str(data['anomaly']) +"   "+str(type(data['anomaly'])))
                 #print("RES" + str(data))
+                ty = data['type']
+                if(ty!= utils.Utils.TYPE_STRESS and ty!=utils.Utils.TYPE_ACTIVITY and ty != utils.Utils.TYPE_RESPIRATION):
+                    return {'message': 'Wrong event type'}, 401
+
                 event = Event(data['name'],data['type'],data['comments'],data['anomaly'],data['value'])
                 res = event.save()
 
                 if res == True:
+                    mqtt.publishMsg(utils.Utils.MQTT_TOPIC_BASE+"/"+data['type'],json.dumps(event.getJSON()))
                     return {"success": 'Event created!'}, 200
                 '''
                 if res == True:

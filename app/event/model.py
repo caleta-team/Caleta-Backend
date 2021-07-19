@@ -15,10 +15,10 @@ class Event(db.Model, UserMixin):
     comments = db.Column(db.String(45))
     anomaly = db.Column(db.BOOLEAN,default=False)
     name = db.Column(db.String(45))
-    value = db.Column(db.Integer())
+    value = db.Column(db.String(100))
     create_time = db.Column(db.BIGINT)
 
-    def __init__(self, name="",type=Utils.getTypeActivity(),comments="",anomaly=False,value=-1):
+    def __init__(self, name="",type=Utils.getTypeActivity(),comments="",anomaly=False,value=""):
         self.name = name
         self.type = type
         self.comments = comments

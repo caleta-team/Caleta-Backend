@@ -8,7 +8,10 @@ class Utils:
     TYPE_STRESS = "stress"
     TYPE_ACTIVITY = "act"
     TYPE_RESPIRATION = "resp"
-
+    MQTT_TOPIC_BASE="caleta"
+    MQTT_TOPIC_STRESS=MQTT_TOPIC_BASE+"/"+TYPE_STRESS
+    MQTT_TOPIC_ACTIVITY = MQTT_TOPIC_BASE + "/" + TYPE_ACTIVITY
+    MQTT_TOPIC_RESPIRATION = MQTT_TOPIC_BASE+"/"+TYPE_RESPIRATION
     def checkEmail(email):
         # pass the regular expression
         # and the string in search() method
