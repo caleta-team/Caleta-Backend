@@ -1,10 +1,38 @@
-from flask import Flask, render_template, Response
-import cv2
-import depthai as dai
+import queue
+import subprocess as sp
+import threading
 
-app = Flask(__name__)
+fps = 30#30
+width = 1920
+height = 1080
+frame_queue = queue.Queue()
+rtmp_url = "rtsp://vai.uca.es:1935/mystream"
+command = ['ffmpeg',
+                       '-y',
+                       '-f', 'rawvideo',
+                       '-vcodec', 'rawvideo',
+                       '-pix_fmt', 'bgr24',
+                       '-s', "{}x{}".format(width, height),
+                       '-i', '-',
+                       '-c:v', 'libx264',
+                       '-pix_fmt', 'yuv420p',
+                       '-preset', 'ultrafast',
+                       '-f', 'rtsp',
+                       rtmp_url]
+p = None
+def push_frame():
+        global command, frame_queue, p
 
-#camera = cv2.VideoCapture(0)  # use 0 for web camera
+        while True:
+            if len(command) > 0:
+                p = sp.Popen(command, stdin=sp.PIPE)
+                break
+
+        while True:
+            if frame_queue.empty() != True:
+                frame = frame_queue.get()
+                p.stdin.write(frame.tostring())
+
 
 def gen_frames():  # generate frame by frame from camera
     while True:
@@ -20,22 +48,26 @@ def gen_frames():  # generate frame by frame from camera
         # Properties
         camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
         camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-        camRgb.setVideoSize(1280, 720)
+        camRgb.setInterleaved(False)
+        camRgb.setPreviewSize(width, height)
+        camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
+        camRgb.setVideoSize(width, height)
         ve2 = pipeline.createVideoEncoder()
-        ve2.setDefaultProfilePreset(1280, 720, 30, dai.VideoEncoderProperties.Profile.MJPEG)
+
+
+
+        ve2.setDefaultProfilePreset(width, height, fps, dai.VideoEncoderProperties.Profile.MJPEG)
         camRgb.video.link(ve2.input)
 
-        #camRgb.setVideoSize(640,400)
+        #camRgb.setVideoSize(width,height)
 
         xoutVideo.input.setBlocking(False)
         xoutVideo.input.setQueueSize(1)
 
         # Linking
         camRgb.video.link(xoutVideo.input)
-        # Connect to device and start pipeline
-        qRgb = None
-        inRgb = None
-        frame = None
+
+
         with dai.Device(pipeline) as device:
             # Output queue will be used to get the rgb frames from the output defined above
             qRgb = device.getOutputQueue(name="video", maxSize=1, blocking=False)
@@ -43,24 +75,25 @@ def gen_frames():  # generate frame by frame from camera
             while True:
                 inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
                 frame = inRgb.getCvFrame() # read the camera frame
-
+                #cv2.imshow("bgr", frame)
                 ret, buffer = cv2.imencode('.jpg', frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
+                if not ret:
+                    print("Opening camera is failed")
 
-@app.route('/video_feed')
-def video_feed():
-    #Video streaming route. Put this in the src attribute of an img tag
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-@app.route('/')
-def index():
-    """Video streaming home page."""
-    return render_template('indexcamera.html')
-
+                    pass
+                else:
+                    frame_queue.put(frame)
+                #yield (b'--frame\r\n'
+                #        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0',port=5000)
+    try:
+        threads = [
+            threading.Thread(target=gen_frames, args=()),
+            threading.Thread(target=push_frame, args=())
+        ]
+        [thread.setDaemon(True) for thread in threads]
+        [thread.start() for thread in threads]
+    except:
+        pass
